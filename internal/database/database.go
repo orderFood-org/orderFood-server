@@ -5,6 +5,7 @@ import (
 	"log"
 	ds "orderFood-server/internal/dataSchema"
 	"os"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	_ "github.com/joho/godotenv/autoload"
@@ -15,6 +16,7 @@ import (
 // Service represents a service that interacts with a database.
 type Service interface {
 	AddUser(username, password string) error
+	DelUser(id uint64) error
 	GetUserById(id string) (ds.User, error)
 
 	// Close terminates the database connection.
@@ -71,6 +73,16 @@ func (s *service) AddUser(username, password string) error {
 	}
 	log.Printf("User added successfully, id: %d", user.ID)
 
+	return nil
+}
+
+func (s *service) DelUser(id uint64) error {
+	result := s.db.Model(&ds.User{}).Where("id = ?", id).Update("deleted_at", time.Now())
+	if result.Error != nil {
+		log.Printf("Error deleting user: %v", result.Error)
+		return result.Error
+	}
+	log.Printf("User deleted successfully, id: %d", id)
 	return nil
 }
 

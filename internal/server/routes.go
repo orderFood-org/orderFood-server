@@ -23,6 +23,7 @@ func (s *Server) RegisterRoutes() http.Handler {
 
 	userV1 := v1.Group("/user")
 	userV1.POST("/add", s.addUserHandler)
+	userV1.POST("/del", s.delUserHandler)
 	userV1.GET("/:id", s.getUserHandler)
 	userV1.GET("/", s.getUserByQueryHandler)
 
@@ -56,6 +57,25 @@ func (s *Server) addUserHandler(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "User added successfully"})
+}
+
+type delUserParams struct {
+	ID uint64 `form:"id"`
+}
+
+func (s *Server) delUserHandler(c *gin.Context) {
+	params := delUserParams{}
+	err := c.ShouldBind(&params)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	err = s.db.DelUser(params.ID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"message": "User deleted successfully"})
 }
 
 func (s *Server) getUserHandler(c *gin.Context) {
