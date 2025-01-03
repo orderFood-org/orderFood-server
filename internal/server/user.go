@@ -18,13 +18,14 @@ func (s *Server) InitUserRoute(r *gin.RouterGroup) {
 }
 
 type addUserParams struct {
-	Username string `form:"username"`
-	Password string `form:"password"`
+	Username string `json:"username"`
+	Password string `json:"password"`
 }
 
 func (s *Server) addUserHandler(c *gin.Context) {
 	params := addUserParams{}
-	err := c.ShouldBind(&params) // 兼容form-data和x-www-form-urlencoded和json
+	// err := c.ShouldBind(&params) // 兼容form-data和x-www-form-urlencoded和json, 对应struct的tag要使用form命名
+	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -40,12 +41,12 @@ func (s *Server) addUserHandler(c *gin.Context) {
 }
 
 type delUserParams struct {
-	ID uint64 `form:"id"`
+	ID uint64 `json:"id"`
 }
 
 func (s *Server) delUserHandler(c *gin.Context) {
 	params := delUserParams{}
-	err := c.ShouldBind(&params)
+	err := c.ShouldBindJSON(&params)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
